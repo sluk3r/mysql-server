@@ -35,7 +35,7 @@
 #include <grp.h> //wxc 2016-11-22:23:52:28 现在明白了， 
 #endif
 #ifdef HAVE_SYS_RESOURCE_H
-#include <sys/resource.h>
+#include <sys/resource.h>  //wxc 2016-11-23:0:08:07 这个resource代表什么？
 #endif
 #ifdef _WIN32
 #include <crtdbg.h>
@@ -147,7 +147,7 @@
 #endif
 
 #ifdef _WIN32
-#include "named_pipe.h"
+#include "named_pipe.h" //wxc 2016-11-23:0:08:51 这样的跨平台也是木有办法的办法了。
 #include "named_pipe_connection.h"
 #include "shared_memory_connection.h"
 #endif
