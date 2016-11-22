@@ -17,22 +17,22 @@
 #include "mysqld_daemon.h"   //wxc 2016-11-22:23:38:22 这些被引入的header文件中， 倒底写着什么？为啥不能直接写到当前？
 
 #include <vector>  //wxc 2016-11-22:23:45:00 这个vector的引用方式应该是上面提到的那个方式。不过， 这个vector在哪定义？
-#include <algorithm>
-#include <functional>
+ #include <algorithm> //wxc 2016-11-22:23:49:33 这个algorithm里面包含了什么？
+#include <functional> //wxc 2016-11-22:23:50:10 少一个<,是自己搞错了？还是在原来就这样。 下面的list和set也这样， 应该是别有深意。
 #include <list>
 #include <set>
-#include <string>
+#include <string> //wxc 2016-11-22:23:51:04 tring是string么？
 
-#include <fenv.h>
+ #include <fenv.h>
 #include <signal.h>
-#ifdef HAVE_SYS_WAIT_H
-#include <sys/wait.h>
+#ifdef HAVE_SYS_WAIT_H //wxc 2016-11-22:23:51:34 这个配置背后代表了什么？
+#include <sys/wait.h> //wxc 2016-11-22:23:51:59 加上它有什么好处？有什么功能？
 #endif
 #ifdef HAVE_PWD_H
 #include <pwd.h>
 #endif
 #ifdef HAVE_GRP_H
-#include <grp.h>
+#include <grp.h> //wxc 2016-11-22:23:52:28 现在明白了， 
 #endif
 #ifdef HAVE_SYS_RESOURCE_H
 #include <sys/resource.h>
