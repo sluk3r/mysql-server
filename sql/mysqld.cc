@@ -152,7 +152,7 @@
 #include "shared_memory_connection.h"
 #endif
 
-using std::min;
+using std::min; //wxc 2016-11-23:0:23:55 这个应该是标准库了。 这个using跟include本质区别？
 using std::max;
 using std::vector;
 
@@ -161,7 +161,7 @@ using std::vector;
 #if defined(HAVE_SOLARIS_LARGE_PAGES) && defined(__GNUC__)
 extern "C" int getpagesizes(size_t *, int);
 extern "C" int memcntl(caddr_t, size_t, int, caddr_t, int, int);
-#endif
+#endif0
 
 #ifdef HAVE_FPU_CONTROL_H
 # include <fpu_control.h>
