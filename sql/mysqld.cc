@@ -147,8 +147,8 @@
 #endif
 
 #ifdef _WIN32
-#include "named_pipe.h" //wxc 2016-11-23:0:08:51 这样的跨平台也是木有办法的办法了。
-#include "named_pipe_connection.h"
+#include "named_pipe.h" //wxc 2016-11-23:0:08:51  这样的办法也是木有办法的办法了。
+#include "named_pipe_connection.h" //wxc 2016-11-23:0:19:11 这里怎么少了一个"
 #include "shared_memory_connection.h"
 #endif
 
