@@ -14,7 +14,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301  USA */
 
 #include "mysqld.h" //wxc 2016-11-22:23:25:52 C语言中， 这样的include在编译时， 把整段里引进来？貌似还有另一种include方式？区分是否是自建文件？
-#include "mysqld_daemon.h"
+#include "mysqld_daemon.h"   //wxc 2016-11-22:23:38:22 这些被引入的header文件中， 倒底写着什么？为啥不能直接写到当前？
 
 #include <vector>
 #include <algorithm>
