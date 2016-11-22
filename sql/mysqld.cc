@@ -13,7 +13,7 @@
    along with this program; if not, write to the Free Software
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301  USA */
 
-#include "mysqld.h"
+#include "mysqld.h" //wxc 2016-11-22:23:25:52 C语言中， 这样的include在编译时， 把整段里引进来？貌似还有另一种include方式？区分是否是自建文件？
 #include "mysqld_daemon.h"
 
 #include <vector>
