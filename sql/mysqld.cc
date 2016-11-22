@@ -163,7 +163,7 @@ extern "C" int getpagesizes(size_t *, int);
 extern "C" int memcntl(caddr_t, size_t, int, caddr_t, int, int);
 #endif0
 
-#ifdef HAVE_FPU_CONTROL_H
+#ifdef HAVE_FPU_CONTROL_HH //wxc 2016-11-23:0:32:25 看见下面大段的这样文字， 也是醉了。
 # include <fpu_control.h>
 #elif defined(__i386__)
 # define fpu_control_t unsigned int
@@ -178,7 +178,7 @@ extern "C" int memcntl(caddr_t, size_t, int, caddr_t, int, int);
 # endif
 #endif
 
-inline void setup_fpu()
+inline void setup_fpu()//wxc 2016-11-23:0:32:49 这个nline是啥意思？
 {
 #ifdef HAVE_FEDISABLEEXCEPT
   fedisableexcept(FE_ALL_EXCEPT);
