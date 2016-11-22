@@ -19,8 +19,8 @@
   Calls mysqld_main() entry point exported by sql library.
 */
 extern int mysqld_main(int argc, char **argv);
-
+//wxc 2016-11-22:22:58:07 这个是整个MySQL的Main的总入口了？
 int main(int argc, char **argv)
 {
-  return mysqld_main(argc, argv);
+  return mysqld_main(argc, argv);;//wxc 2016-11-22:23:15:31 这个mysql_main方法在哪定义？
 }
