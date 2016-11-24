@@ -63,61 +63,61 @@
 #include "sql_base.h"     // table_def_free, table_def_init,
                           // Table_cache,
                           // cached_table_definitions
-#include "sql_test.h"     // mysql_print_status
-#include "item_create.h"  // item_create_cleanup, item_create_init
-#include "sql_servers.h"  // servers_free, servers_init
-#include "init.h"         // unireg_init
-#include "derror.h"       // init_errmessage
-#include "des_key_file.h" // load_des_key_file
-#include "sql_manager.h"  // stop_handle_manager, start_handle_manager
-#include "bootstrap.h"    // bootstrap
-#include <m_ctype.h>
-#include <my_dir.h>
-#include <my_bit.h>
-#include "rpl_gtid.h"
-#include "rpl_gtid_persist.h"
-#include "rpl_slave.h"
-#include "rpl_msr.h"
+#include "sql_test.h"     // mysql_print_status  //wxc 2016-11-24:21:46:31 主干文件中， 引入test方面的代码， 也是第一次见。 再次重视Java
+#include "item_create.h"  // item_create_cleanup, item_create_init //wxc 2016-11-24:21:47:29 这个create是什么业务？
+#include "sql_servers.h"  // servers_free, servers_init //wxc 2016-11-24:21:47:54 重点看下这个server文件。这里使用了server文件中的什么？或者从业务角度看， 两个文件之间有什么依赖？
+#include "init.h"         // unireg_init //wxc 2016-11-24:22:16:47 init？应该是要调用init里的方法， 做初始化操作。
+#include "derror.h"       // init_errmessage //wxc 2016-11-24:22:18:09 errmessage为啥也要做init操作？
+#include "des_key_file.h" // load_des_key_file //wxc 2016-11-24:22:18:00 des怎么理解？
+#include "sql_manager.h"  // stop_handle_manager, start_handle_manager //wxc 2016-11-24:22:18:27 具体都管理了什么？
+#include "bootstrap.h"    // bootstrap //wxc 2016-11-24:22:18:44 这里也有bootstrap的概念？
+#include <m_ctype.h>  //wxc 2016-11-24:22:19:33 type后加一个c怎么解释？
+#include <my_dir.h> //wxc 2016-11-24:22:19:54 是说MySQL的数据文件所在谁文件夹么？
+#include <my_bit.h> //wxc 2016-11-24:22:20:37 bit这么底层的概念， 也在这里出现？
+#include "rpl_gtid.h" //wxc 2016-11-24:22:21:05 rpl代表了什么？
+#include "rpl_gtid_persist.h" //wxc 2016-11-24:22:21:22 gtid是什么？
+#include "rpl_slave.h" //wxc 2016-11-24:22:21:34 rpl貌似是replication的意思。 
+#include "rpl_msr.h" //wxc 2016-11-24:22:21:57 这里的msr是啥？
 #include "rpl_master.h"
-#include "rpl_mi.h"
-#include "rpl_filter.h"
-#include <sql_common.h>
-#include <my_stacktrace.h>
-#include "mysqld_suffix.h"
+#include "rpl_mi.h" //wxc 2016-11-24:22:22:06 mi怎么理解？代表了什么？
+#include "rpl_filter.h" //wxc 2016-11-24:22:22:19 这个filter是什么概念？
+#include <sql_common.h> 
+#include <my_stacktrace.h> //wxc 2016-11-24:22:22:38 stacktrace需要自己项目中再定义？
+#include "mysqld_suffix.h"//wxc 2016-11-24:22:23:06 suffix怎么理解？
 #include "mysys_err.h"
-#include "events.h"
+#include "events.h" //wxc 2016-11-24:22:23:21 事件都怎么理解？都有哪些事件？
 #include "sql_audit.h"
-#include "probes_mysql.h"
+#include "probes_mysql.h"//wxc 2016-11-24:22:23:40 probes怎么理解?代表了什么？
 #include "debug_sync.h"
 #include "sql_callback.h"
-#include "opt_trace_context.h"
-#include "opt_costconstantcache.h"
-#include "sql_plugin.h"                         // plugin_shutdown
-#include "sql_initialize.h"
+#include "opt_trace_context.h" //wxc 2016-11-24:22:24:05 opt代表了优化？
+#include "opt_costconstantcache.h" //wxc 2016-11-24:22:24:21 这个cache怎么理解？
+#include "sql_plugin.h"                         // plugin_shutdown //wxc 2016-11-24:22:26:58 这里的plugin是代表了存储引擎么？貌似
+#include "sql_initialize.h" //wxc 2016-11-24:22:27:31 跟前面的init的关系？
 #include "log_event.h"
 #include "log.h"
 #include "binlog.h"
-#include "rpl_rli.h"     // Relay_log_info
-#include "replication.h" // thd_enter_cond
+#include "rpl_rli.h"     // Relay_log_info //wxc 2016-11-24:22:28:01 relay怎么理解？
+#include "replication.h" // thd_enter_cond 
 
-#include "my_default.h"
-#include "mysql_version.h"
+#include "my_default.h" //wxc 2016-11-24:22:28:17 default怎么理解？
+#include "mysql_version.h" //wxc 2016-11-24:22:28:30 version也还单独搞了一个文件？
 
-#ifdef WITH_PERFSCHEMA_STORAGE_ENGINE
-#include "../storage/perfschema/pfs_server.h"
-#include <pfs_idle_provider.h>
+#ifdef WITH_PERFSCHEMA_STORAGE_ENGINE   //wxc 2016-11-24:22:30:01 现在默认的版本里， 会不会加启动这些功能？很可能没有启用。 这也是阿里要自己搞一个分支的原因吧？
+#include "../storage/perfschema/pfs_server.h" //wxc 2016-11-24:22:29:06 越来越觉得， 模块化分的比较差。 
+#include <pfs_idle_provider.h> //wxc 2016-11-24:22:29:33 idle跟provider的关系？
 #endif /* WITH_PERFSCHEMA_STORAGE_ENGINE */
 
-#include "pfs_file_provider.h"
-#include "mysql/psi/mysql_file.h"
+#include "pfs_file_provider.h" //wxc 2016-11-24:22:30:59 还是不解。
+#include "mysql/psi/mysql_file.h" //wxc 2016-11-24:22:31:07 这个psi是什么意思？
 
 #include <mysql/psi/mysql_idle.h>
 #include <mysql/psi/mysql_socket.h>
 #include <mysql/psi/mysql_memory.h>
 #include <mysql/psi/mysql_statement.h>
 
-#include "mysql_com_server.h"
-#include "keycaches.h"
+#include "mysql_com_server.h"//wxc 2016-11-24:22:31:46 com跟server的关系？
+#include "keycaches.h"//wxc 2016-11-24:22:32:09  key是索引里的那个key么？
 #include "../storage/myisam/ha_myisam.h"
 #include "set_var.h"
 #include "sys_vars_shared.h"
@@ -178,7 +178,7 @@ extern "C" int memcntl(caddr_t, size_t, int, caddr_t, int, int);
 # endif
 #endif
 
-inline void setup_fpu()//wxc 2016-11-23:0:32:49 这个nline是啥意思？
+inline void setup_fpu()//wxc 2016-11-23:0:32:49 这个ninline是啥意思？
 {
 #ifdef HAVE_FEDISABLEEXCEPT
   fedisableexcept(FE_ALL_EXCEPT);

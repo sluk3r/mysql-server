@@ -24,3 +24,6 @@ int main(int argc, char **argv)
 {
   return mysqld_main(argc, argv);;//wxc 2016-11-22:23:15:31 这个mysql_main方法在哪定义？
 }
+
+//wxc 2016-11-24:21:42:19 
+//
