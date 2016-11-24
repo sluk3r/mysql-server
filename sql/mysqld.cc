@@ -1153,8 +1153,8 @@ static void mysqld_exit(int exit_code)
   Srv_session::module_deinit();
 #endif
   delete_optimizer_cost_module();
-  clean_up_mutexes();
-  my_end(opt_endinfo ? MY_CHECK_ERROR | MY_GIVE_INFO : 0);
+  clean_up_mutexes(); //wxc 2016-11-25:9:09:33 防止下启动时有脏数据文件启动失败。 
+  my_end(opt_endinfo ? MY_CHECK_ERROR | MY_GIVE_INFO : 0);//wxc 2016-11-25:9:10:16 这里又有多余的end？这里会end什么？
   destroy_error_log();
 #ifdef WITH_PERFSCHEMA_STORAGE_ENGINE
   shutdown_performance_schema();
