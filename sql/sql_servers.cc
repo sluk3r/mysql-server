@@ -15,17 +15,17 @@
 
 
 /*
-  The servers are saved in the system table "servers"
+  The servers are saved in the system table "servers"  //wxc 2016-11-26:21:07:46 有一个server表？
   
-  Currently, when the user performs an ALTER SERVER or a DROP SERVER
-  operation, it will cause all open tables which refer to the named
+  Currently, when the user performs an ALTER SERVER or a DROP SERVER //wxc pro 2016-11-26:21:08:25 还有这样的操作？ server具体指什么？
+  operation, it will cause all open tables which refer to the named //wxc 2016-11-26:21:08:52 这个server相当于instance？貌似。 
   server connection to be flushed. This may cause some undesirable
   behaviour with regard to currently running transactions. It is 
   expected that the DBA knows what s/he is doing when s/he performs
-  the ALTER SERVER or DROP SERVER operation.
+  the ALTER SERVER or DROP SERVER operation. //wxc 2016-11-26:21:09:56 DBA也读读源码？光看手册，难免有不以为然之感。
   
   TODO:
-  It is desirable for us to implement a callback mechanism instead where
+  It is desirable for us to implement a callback mechanism instead where //wxc 2016-11-26:21:15:30 这里的callback具体能做什么？
   callbacks can be registered for specific server protocols. The callback
   will be fired when such a server name has been created/altered/dropped
   or when statistics are to be gathered such as how many actual connections.

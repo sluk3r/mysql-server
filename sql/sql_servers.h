@@ -21,7 +21,7 @@
 #include "sql_string.h"
 #include "sql_alloc.h"
 
-class THD;
+class THD; //wxc 2016-11-26:21:17:17 这里的THD是声明？还是创建一个线程？
 struct TABLE;
 typedef struct st_mem_root MEM_ROOT;
 
@@ -39,11 +39,11 @@ public:
     owner(NULL), host(NULL), sport(NULL)
   { }
 };
-
+//wxc 2016-11-26:21:18:03 以为到这就结束了， 原来下面还有别的文件。 
 
 /* cache handlers */
 bool servers_init(bool dont_read_server_table);
-bool servers_reload(THD *thd);
+bool servers_reload(THD *thd);//wxc 2016-11-26:21:18:25 看到这里， 意识到， 是不是head文件中会声明些当前module相关的变量？或者是head文件中声明一些方法， 对外是public的， 而在.cc文件中实现这里声明的方法？貌似
 void servers_free(bool end=0);
 
 /* lookup functions */
@@ -52,13 +52,13 @@ FOREIGN_SERVER *get_server_by_name(MEM_ROOT *mem, const char *server_name,
 
 
 /**
-   This class represent server options as set by the parser.
+   This class represent server options as set by the parser.//wxc 2016-11-26:21:22:15 就是给配置项用一个类封装起来。 
  */
 
 class Server_options
 {
 public:
-  static const long PORT_NOT_SET= -1;
+  static const long PORT_NOT_SET= -1; //wxc 2016-11-26:21:22:51 是不是说， static相当于Java中的private？或者说还有别的？
   LEX_STRING m_server_name;
 private:
   long m_port;
@@ -71,7 +71,7 @@ private:
   LEX_STRING m_owner;
 
 public:
-  void set_port(long port)               { m_port= port; }
+  void set_port(long port)               { m_port= port; } //wxc 2016-11-26:21:23:37 很熟悉的get/set嘛 原来不光是Java有， C/C++中也有。
   void set_host(LEX_STRING host)         { m_host= host; }
   void set_db(LEX_STRING db)             { m_db= db; }
   void set_username(LEX_STRING username) { m_username= username; }
@@ -93,7 +93,7 @@ public:
      Reset all strings to NULL and port to PORT_NOT_SET.
      This prepares the structure for being used by a new statement.
   */
-  void reset();
+  void reset();//wxc 2016-11-26:21:24:36 这个语法上代表着什么？
 
   /**
      Create a cache entry and insert it into the cache.
