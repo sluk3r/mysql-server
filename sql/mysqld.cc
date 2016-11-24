@@ -254,12 +254,12 @@ static PSI_thread_key key_thread_handle_con_sharedmem;
 static PSI_thread_key key_thread_handle_con_sockets;
 static PSI_mutex_key key_LOCK_handler_count;
 static PSI_cond_key key_COND_handler_count;
-static PSI_thread_key key_thread_handle_shutdown;
+static PSI_thread_key key_thread_handle_shutdown;//wxc 2016-11-25:7:15:57 貌似PSI开头的这些应该是自定义的变量类型
 #else
 static PSI_mutex_key key_LOCK_socket_listener_active;
 static PSI_cond_key key_COND_socket_listener_active;
 static PSI_mutex_key key_LOCK_start_signal_handler;
-static PSI_cond_key key_COND_start_signal_handler;
+static PSI_cond_key key_COND_start_signal_handler; //wxc 2016-11-25:7:15:22 这里的static怎么解释？
 #endif // _WIN32
 #endif // !EMBEDDED_LIBRARY
 #endif /* HAVE_PSI_INTERFACE */
@@ -299,7 +299,7 @@ static bool binlog_format_used= false;
 
 LEX_STRING opt_init_connect, opt_init_slave;
 
-/* Global variables */
+/* Global variables */ //wxc 2016-11-25:7:16:37 全量变量
 
 bool opt_bin_log, opt_ignore_builtin_innodb= 0;
 bool opt_general_log, opt_slow_log, opt_general_log_raw;
@@ -514,6 +514,7 @@ ulong stored_program_cache_size= 0;
 */
 my_bool avoid_temporal_upgrade;
 
+//wxc 2016-11-25:7:19:28 这个数组代表着什么业务？
 const double log_10[] = {
   1e000, 1e001, 1e002, 1e003, 1e004, 1e005, 1e006, 1e007, 1e008, 1e009,
   1e010, 1e011, 1e012, 1e013, 1e014, 1e015, 1e016, 1e017, 1e018, 1e019,
@@ -548,7 +549,7 @@ const double log_10[] = {
   1e300, 1e301, 1e302, 1e303, 1e304, 1e305, 1e306, 1e307, 1e308
 };
 
-time_t server_start_time, flush_status_time;
+time_t server_start_time, flush_status_time; //wxc 2016-11-25:7:40:28 现在也不方便看下这个time_t是哪个文件里定义的类型？
 
 char server_uuid[UUID_LENGTH+1];
 const char *server_uuid_ptr;
@@ -567,13 +568,13 @@ char mysql_unpacked_real_data_home[FN_REFLEN];
 size_t mysql_unpacked_real_data_home_len;
 size_t mysql_real_data_home_len, mysql_data_home_len= 1;
 uint reg_ext_length;
-const key_map key_map_empty(0);
+const key_map key_map_empty(0); //wxc 2016-11-25:7:41:03 关注MySQL的核心业务， 而不是怎么优雅地设计。 另一方面， 是不是自己可以尝试着用Java的封装思想重试实现下？不为性能， 只是想从业务上更好地理解下。
 key_map key_map_full(0);                        // Will be initialized later
 char logname_path[FN_REFLEN];
 char slow_logname_path[FN_REFLEN];
 char secure_file_real_path[FN_REFLEN];
 
-Date_time_format global_date_format, global_datetime_format, global_time_format;
+Date_time_format global_date_format, global_datetime_format, global_time_format; //wxc 2016-11-25:7:42:33 这里的time_format， 很熟悉嘛
 Time_zone *default_tz;
 
 char *mysql_data_home= const_cast<char*>(".");
@@ -596,7 +597,7 @@ ulong connection_errors_peer_addr= 0;
 #endif
 
 /* classes for comparation parsing/processing */
-Eq_creator eq_creator;
+Eq_creator eq_creator; //wxc 2016-11-25:7:43:21 这样的语句很容易跟Java中的声明搞混， 这里已经产生了一个新的对象了。
 Ne_creator ne_creator;
 Equal_creator equal_creator;
 Gt_creator gt_creator;
@@ -671,7 +672,7 @@ my_thread_attr_t connection_attrib;
 mysql_mutex_t LOCK_server_started;
 mysql_cond_t COND_server_started;
 mysql_mutex_t LOCK_reset_gtid_table;
-mysql_mutex_t LOCK_compress_gtid_table;
+mysql_mutex_t LOCK_compress_gtid_table; //wxc 2016-11-25:7:48:56 碰到锁窝了。 
 mysql_cond_t COND_compress_gtid_table;
 mysql_mutex_t LOCK_group_replication_handler;
 #if !defined (EMBEDDED_LIBRARY) && !defined(_WIN32)
@@ -741,7 +742,7 @@ Sid_map *global_sid_map= NULL;
 Gtid_state *gtid_state= NULL;
 Gtid_table_persistor *gtid_table_persistor= NULL;
 
-
+//wxc 2016-11-25:7:44:55 700多行了， 才看到第一个函数定义。 
 void set_remaining_args(int argc, char **argv)
 {
   remaining_argc= argc;
@@ -755,19 +756,19 @@ void set_remaining_args(int argc, char **argv)
  */
 ulong sql_rnd_with_mutex()
 {
-  mysql_mutex_lock(&LOCK_sql_rand);
-  ulong tmp=(ulong) (my_rnd(&sql_rand) * 0xffffffff); /* make all bits random */
+  mysql_mutex_lock(&LOCK_sql_rand); //wxc 2016-11-25:7:59:02 这个函数在哪定义的？
+  ulong tmp=(ulong) (my_rnd(&sql_rand) * 0xffffffff); /* make all bits random */ //wxc 2016-11-25:7:59:13 生成一个随机数时加锁的必要性？
   mysql_mutex_unlock(&LOCK_sql_rand);
   return tmp;
 }
 
 
-C_MODE_START
+C_MODE_START //wxc 2016-11-25:7:59:41 这个是什么意思？编译器怎么视别？
 
-static void option_error_reporter(enum loglevel level, const char *format, ...)
+static void option_error_reporter(enum loglevel level, const char *format, ...) //wxc 2016-11-25:8:00:32 C语言中也支持...？
 {
   va_list args;
-  va_start(args, format);
+  va_start(args, format);//wxc 2016-11-25:8:00:57 统计信息， 为后续优化等提供数据。 看错了， 不是stat， 而是start。
 
   /* Don't print warnings for --loose options during bootstrap */
   if (level == ERROR_LEVEL || !opt_bootstrap ||
@@ -775,7 +776,7 @@ static void option_error_reporter(enum loglevel level, const char *format, ...)
   {
     error_log_print(level, format, args);
   }
-  va_end(args);
+  va_end(args);//wxc 2016-11-25:8:01:29 这里的end指？这里start跟end使用的必要性。  http://www.cplusplus.com/reference/cstdarg/va_start/ 原来是标准库里的函数定义。 
 }
 
 /**
@@ -894,7 +895,8 @@ static void delete_pid_file(myf flags);
   If m_kill_dump_thread_flag is not set it kills all other threads
   except dump threads. If this flag is set, it kills dump threads.
 */
-class Set_kill_conn : public Do_THD_Impl
+//wxc 2016-11-25:8:06:43 终于看到第一个类定义了， 这已经是898行的事了。
+class Set_kill_conn : public Do_THD_Impl //wxc 2016-11-25:8:11:06 这个类会在哪用到？这里的Set怎么解释？只是设置了一个kill的标识么？
 {
 private:
   int m_dump_thread_count;
@@ -903,7 +905,7 @@ public:
   Set_kill_conn()
     : m_dump_thread_count(0),
       m_kill_dump_threads_flag(false)
-  {}
+  {}//wxc 2016-11-25:8:07:40 这个空花括号跟上面的两行怎么个关联？貌似是构造方法特有的，
 
   void set_dump_thread_flag()
   {
@@ -919,16 +921,16 @@ public:
   {
     DBUG_PRINT("quit",("Informing thread %u that it's time to die",
                        killing_thd->thread_id()));
-    if (!m_kill_dump_threads_flag)
+    if (!m_kill_dump_threads_flag) //wxc 2016-11-25:8:14:14 C语言中volatile的概念及机制怎样？
     {
       // We skip slave threads & scheduler on this first loop through.
-      if (killing_thd->slave_thread)
+      if (killing_thd->slave_thread)//wxc 2016-11-25:8:15:03 貌似这个类就是专门Kill线程的？
         return;
 
       if (killing_thd->get_command() == COM_BINLOG_DUMP ||
           killing_thd->get_command() == COM_BINLOG_DUMP_GTID)
       {
-        ++m_dump_thread_count;
+        ++m_dump_thread_count;//wxc 2016-11-25:8:16:15 这里没有锁的概念？貌似会丢失些信息。
         return;
       }
       DBUG_EXECUTE_IF("Check_dump_thread_is_alive",
@@ -937,9 +939,10 @@ public:
                                     killing_thd->get_command() != COM_BINLOG_DUMP_GTID);
                       };);
     }
+    //wxc 2016-11-25:8:17:17 先锁上线程中持有的数据。
     mysql_mutex_lock(&killing_thd->LOCK_thd_data);
-    killing_thd->killed= THD::KILL_CONNECTION;
-    MYSQL_CALLBACK(Connection_handler_manager::event_functions,
+    killing_thd->killed= THD::KILL_CONNECTION;//wxc 2016-11-25:8:17:57 这个常量代表着什么意思？结合下面的killable,这里的值貌似是killing的状态？
+    MYSQL_CALLBACK(Connection_handler_manager::event_functions,//wxc 2016-11-25:8:18:10 有一个自定义的CALLBACK的机制。
                    post_kill_notification, (killing_thd));
     if (killing_thd->is_killable)
     {
@@ -952,7 +955,7 @@ public:
       }
       mysql_mutex_unlock(&killing_thd->LOCK_current_cond);
     }
-    mysql_mutex_unlock(&killing_thd->LOCK_thd_data);
+    mysql_mutex_unlock(&killing_thd->LOCK_thd_data);//wxc 2016-11-25:8:20:21 这么多锁需要维护， MySQL团队内部是怎么来维护这些锁， 从而做到不会死锁的？
   }
 };
 
@@ -960,7 +963,7 @@ public:
   This class implements callback function used by close_connections()
   to close vio connection for all thds in thd list
 */
-class Call_close_conn : public Do_THD_Impl
+class Call_close_conn : public Do_THD_Impl //wxc 2016-11-25:8:26:22 这个父单做了什么？
 {
 public:
   Call_close_conn(bool server_shutdown) : is_server_shutdown(server_shutdown)
@@ -968,7 +971,7 @@ public:
 
   virtual void operator()(THD *closing_thd)
   {
-    if (closing_thd->get_protocol()->connection_alive())
+    if (closing_thd->get_protocol()->connection_alive())//wxc 2016-11-25:8:28:28 没有期待中的那么多个锁出现。并不是都会上锁的。 
     {
       LEX_CSTRING main_sctx_user= closing_thd->m_main_security_ctx.user();
       sql_print_warning(ER_DEFAULT(ER_FORCING_CLOSE),my_progname,
@@ -986,7 +989,7 @@ private:
   bool is_server_shutdown;
 };
 
-static void close_connections(void)
+static void close_connections(void) //wxc 2016-11-25:8:29:30 参数里写成void， 上面方法调用时，又传进来那么大坨字段， 这是个什么机制？方法调用里传进来的那些参数，这里怎么按名字地取得？还是直接按顺序就Ok了？貌似？差点搞错了， 上面调用的方法是没有s的， 这里方法的定义是有s的。 
 {
   DBUG_ENTER("close_connections");
   (void) RUN_HOOK(server_state, before_server_shutdown, (NULL));
@@ -1105,7 +1108,7 @@ void kill_mysql(void)
 }
 
 
-extern "C" void unireg_abort(int exit_code)
+extern "C" void unireg_abort(int exit_code)  //wxc 2016-11-25:8:58:08 这里的"C" void怎么解释？ unireg具体代表了什么？
 {
   DBUG_ENTER("unireg_abort");
 
