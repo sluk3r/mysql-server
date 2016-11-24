@@ -992,15 +992,15 @@ private:
 static void close_connections(void) //wxc 2016-11-25:8:29:30 参数里写成void， 上面方法调用时，又传进来那么大坨字段， 这是个什么机制？方法调用里传进来的那些参数，这里怎么按名字地取得？还是直接按顺序就Ok了？貌似？差点搞错了， 上面调用的方法是没有s的， 这里方法的定义是有s的。 
 {
   DBUG_ENTER("close_connections");
-  (void) RUN_HOOK(server_state, before_server_shutdown, (NULL));
+  (void) RUN_HOOK(server_state, before_server_shutdown, (NULL)); //wxc 2016-11-25:20:32:56 前面加一个void是什么个意思？
 
-  Per_thread_connection_handler::kill_blocked_pthreads();
+  Per_thread_connection_handler::kill_blocked_pthreads();//wxc 2016-11-25:20:33:19 像是Java中的Static方法调用？
 
   uint dump_thread_count= 0;
   uint dump_thread_kill_retries= 8;
 
   // Close listeners.
-  if (mysqld_socket_acceptor != NULL)
+  if (mysqld_socket_acceptor != NULL) //wxc 2016-11-25:20:38:44 Java里， 在JVM里已经做这了这事。 
     mysqld_socket_acceptor->close_listener();
 #ifdef _WIN32
   if (named_pipe_acceptor != NULL)
@@ -1012,18 +1012,18 @@ static void close_connections(void) //wxc 2016-11-25:8:29:30 参数里写成void
 
   /*
     First signal all threads that it's time to die
-    This will give the threads some time to gracefully abort their
+    This will give the threads some time to gracefully abort their //wxc 2016-11-25:20:40:14 具体多长时间？ 
     statements and inform their clients that the server is about to die.
   */
 
-  Global_THD_manager *thd_manager= Global_THD_manager::get_instance();
-  sql_print_information("Giving %d client threads a chance to die gracefully",
+  Global_THD_manager *thd_manager= Global_THD_manager::get_instance();//wxc 2016-11-25:20:40:50 单例？ 
+  sql_print_information("Giving %d client threads a chance to die gracefully",//wxc 2016-11-25:20:41:38 死的优雅些， 情怀不错。 
                         static_cast<int>(thd_manager->get_thd_count()));
 
   Set_kill_conn set_kill_conn;
   thd_manager->do_for_all_thd(&set_kill_conn);
   sql_print_information("Shutting down slave threads");
-  end_slave();
+  end_slave();//wxc 2016-11-25:20:42:25 关掉slave实例。 
 
   if (set_kill_conn.get_dump_thread_count())
   {
@@ -1034,13 +1034,13 @@ static void close_connections(void) //wxc 2016-11-25:8:29:30 参数里写成void
     while (thd_manager->get_thd_count() > dump_thread_count &&
            dump_thread_kill_retries)
     {
-      sleep(1);
+      sleep(1);//wxc 2016-11-25:20:43:45 这里要等下的意思。
       dump_thread_kill_retries--;
     }
     set_kill_conn.set_dump_thread_flag();
     thd_manager->do_for_all_thd(&set_kill_conn);
   }
-  if (thd_manager->get_thd_count() > 0)
+  if (thd_manager->get_thd_count() > 0) //wxc 2016-11-25:20:44:10 这里只等一次？
     sleep(2);         // Give threads time to die
 
   /*
@@ -1063,24 +1063,24 @@ static void close_connections(void) //wxc 2016-11-25:8:29:30 参数里写成void
   Events::deinit();
   DBUG_PRINT("quit",("Waiting for threads to die (count=%u)",
                      thd_manager->get_thd_count()));
-  thd_manager->wait_till_no_thd();
+  thd_manager->wait_till_no_thd();//wxc 2016-11-25:20:45:09 确认已经没有线程运行了。 
 
   /*
     Connection threads might take a little while to go down after removing from
     global thread list. Give it some time.
   */
-  Connection_handler_manager::wait_till_no_connection();
+  Connection_handler_manager::wait_till_no_connection();//wxc 2016-11-25:20:45:21 等着看到再没有连接了。
 
-  delete_slave_info_objects();
+  delete_slave_info_objects();//wxc 2016-11-25:20:45:37 这里具体要删除些什么？
   DBUG_PRINT("quit",("close_connections thread"));
 
-  (void) RUN_HOOK(server_state, after_server_shutdown, (NULL));
+  (void) RUN_HOOK(server_state, after_server_shutdown, (NULL));//wxc 2016-11-25:20:45:50 又是这个void转型
 
-  DBUG_VOID_RETURN;
+  DBUG_VOID_RETURN;//wxc 2016-11-25:20:46:09 这个怎么解释？
 }
 
 
-void kill_mysql(void)
+void kill_mysql(void)//wxc 2016-11-25:20:46:32 为啥还要多此一举地加一个void？
 {
   DBUG_ENTER("kill_mysql");
 
@@ -1104,7 +1104,7 @@ void kill_mysql(void)
   }
 #endif
   DBUG_PRINT("quit",("After pthread_kill"));
-  DBUG_VOID_RETURN;
+  DBUG_VOID_RETURN;//wxc 2016-11-25:20:47:07 跟现在公司的UMP数据采集差不多。 不过，这个DEBUG_VOID_RETURN也不像方法调用。这是个啥？是宏么？
 }
 
 
@@ -1144,10 +1144,10 @@ extern "C" void unireg_abort(int exit_code)  //wxc 2016-11-25:8:58:08 这里的"
   mysqld_exit(exit_code);
 }
 
-static void mysqld_exit(int exit_code)
+static void mysqld_exit(int exit_code)//wxc 2016-11-25:20:48:30 方法定义前面加不加static有什么影响？
 {
   DBUG_ASSERT(exit_code >= MYSQLD_SUCCESS_EXIT
-              && exit_code <= MYSQLD_FAILURE_EXIT);
+              && exit_code <= MYSQLD_FAILURE_EXIT); //wxc 2016-11-25:20:48:52 这种DEBUG_ASSERT是个啥机制？另一方面这个是从哪里引来的？
   mysql_audit_finalize();
 #ifndef EMBEDDED_LIBRARY
   Srv_session::module_deinit();
@@ -1180,7 +1180,7 @@ static void mysqld_exit(int exit_code)
    GTID cleanup destroys objects and reset their pointer.
    Function is reentrant.
 */
-void gtid_server_cleanup()
+void gtid_server_cleanup() //wxc pro 2016-11-25:20:50:04 这里的GTID何解？
 {
   if (gtid_state != NULL)
   {
@@ -1210,7 +1210,7 @@ void gtid_server_cleanup()
 }
 
 /**
-   GTID initialization.
+   GTID initialization.  //wxc 2016-11-25:20:54:00  https://dev.mysql.com/doc/refman/5.6/en/replication-gtids-concepts.html   global transaction identifier (GTID) 不错怎么具体个识别法？
 
    @return true if allocation does not succeed
            false if OK
@@ -1219,11 +1219,11 @@ bool gtid_server_init()
 {
   bool res=
     (!(global_sid_lock= new Checkable_rwlock(
-#ifdef HAVE_PSI_INTERFACE
+#ifdef HAVE_PSI_INTERFACE //wxc 2016-11-25:20:54:43 竟然要在某一个变量上设置这种编译开头。 惨无人道。 
                                              key_rwlock_global_sid_lock
 #endif
                                             )) ||
-     !(gtid_mode_lock= new Checkable_rwlock(
+     !(gtid_mode_lock= new Checkable_rwlock( //wxc 2016-11-25:20:55:10 这样的checkable锁具体指？
 #ifdef HAVE_PSI_INTERFACE
                                             key_rwlock_gtid_mode_lock
 #endif
@@ -1240,7 +1240,7 @@ bool gtid_server_init()
 
 #ifndef EMBEDDED_LIBRARY
 // Free connection acceptors
-static void free_connection_acceptors()
+static void free_connection_acceptors() //wxc 2016-11-25:20:55:58 连接的acceptor具体指？
 {
   delete mysqld_socket_acceptor;
   mysqld_socket_acceptor= NULL;
@@ -1248,23 +1248,23 @@ static void free_connection_acceptors()
 #ifdef _WIN32
   delete named_pipe_acceptor;
   named_pipe_acceptor= NULL;
-  delete shared_mem_acceptor;
+  delete shared_mem_acceptor;//wxc 2016-11-25:20:56:17 这里的delete是声明不再使用， 会自动回收么？
   shared_mem_acceptor= NULL;
 #endif
 }
 #endif
 
 
-void clean_up(bool print_message)
+void clean_up(bool print_message) //wxc 2016-11-25:20:57:14 具体都清空了哪些？
 {
   DBUG_PRINT("exit",("clean_up"));
-  if (cleanup_done++)
+  if (cleanup_done++) //wxc 2016-11-25:20:57:29 这个变量用的术随便了吧。 
     return; /* purecov: inspected */
 
   stop_handle_manager();
   release_ddl_log();
 
-  memcached_shutdown();
+  memcached_shutdown();//wxc 2016-11-25:20:57:55 感觉清空的东西太多了。 
 
   /*
     make sure that handlers finish up
@@ -1272,9 +1272,9 @@ void clean_up(bool print_message)
   */
   if ((opt_help == 0) || (opt_verbose > 0))
     sql_print_information("Binlog end");
-  ha_binlog_end(current_thd);
+  ha_binlog_end(current_thd); 
 
-  injector::free_instance();
+  injector::free_instance();//wxc 2016-11-25:20:59:55 这个injector应该是个自定义的类？
   mysql_bin_log.cleanup();
   gtid_server_cleanup();
 
@@ -1282,7 +1282,7 @@ void clean_up(bool print_message)
   if (use_slave_mask)
     bitmap_free(&slave_error_mask);
 #endif
-  my_tz_free();
+  my_tz_free(); //wxc 2016-11-25:21:00:26 这里的my_tz是什么的缩写？
   my_dboptions_cache_free();
   ignore_db_dirs_free();
   servers_free(1);
@@ -1356,17 +1356,17 @@ void clean_up(bool print_message)
   deinit_errmessage(); // finish server errs
   DBUG_PRINT("quit", ("Error messages freed"));
 
-  free_charsets();
+  free_charsets();//wxc 2016-11-25:21:01:17 字符集也要去free下？何意？
   sys_var_end();
   Global_THD_manager::destroy_instance();
 
-  my_free(const_cast<char*>(log_bin_basename));
+  my_free(const_cast<char*>(log_bin_basename));//wxc 2016-11-25:21:01:43 这个my_free应该是相对于标准的free的扩展？
   my_free(const_cast<char*>(log_bin_index));
 #ifndef EMBEDDED_LIBRARY
   my_free(const_cast<char*>(relay_log_basename));
   my_free(const_cast<char*>(relay_log_index));
 #endif
-  free_list(opt_early_plugin_load_list_ptr);
+  free_list(opt_early_plugin_load_list_ptr);//wxc 2016-11-25:21:02:08 有必要再去清空这么多东西么？感觉还是Java的接口方便些， 定义那么接口的实现， 再在统一的地方遍历下。方便管理。
   free_list(opt_plugin_load_list_ptr);
 
   if (THR_THD_initialized)
@@ -1397,7 +1397,7 @@ void clean_up(bool print_message)
 
 
 #ifndef EMBEDDED_LIBRARY
-
+//wxc 2016-11-25:21:03:40 这里是锁的集中营？
 static void clean_up_mutexes()
 {
   mysql_mutex_destroy(&LOCK_log_throttle_qni);
@@ -1438,7 +1438,7 @@ static void clean_up_mutexes()
 ** Init IP and UNIX socket
 ****************************************************************************/
 
-static void set_ports()
+static void set_ports()//wxc 2016-11-25:21:05:19 概念不陌生， 想起了毛批三国演义。
 {
   char  *env;
   if (!mysqld_port && !opt_disable_networking)
