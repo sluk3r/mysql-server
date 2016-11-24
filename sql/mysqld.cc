@@ -130,26 +130,26 @@
 #include "sp_head.h"  // init_sp_psi_keys
 #include "event_data_objects.h" //init_scheduler_psi_keys
 #include "my_timer.h"    // my_timer_init, my_timer_deinit //wxc 2016-11-24:22:51:40 这个timer一般对应着什么业务场景？
-#include "table_cache.h"                // table_cache_manager
+#include "table_cache.h"                // table_cache_manager //wxc 2016-11-25:7:08:35 table缓存里放的是表的数据？
 #include "connection_acceptor.h"        // Connection_acceptor
-#include "connection_handler_impl.h"    // *_connection_handler
+#include "connection_handler_impl.h"    // *_connection_handler //wxc 2016-11-25:7:09:02 C语言里也有Impl概念？
 #include "connection_handler_manager.h" // Connection_handler_manager
 #include "socket_connection.h"          // Mysqld_socket_listener
 #include "mysqld_thd_manager.h"         // Global_THD_manager
-#include "my_getopt.h"
-#include "partitioning/partition_handler.h" // partitioning_init
-#include "item_cmpfunc.h"               // arg_cmp_func
-#include "item_strfunc.h"               // Item_func_uuid
-#include "handler.h"
+#include "my_getopt.h" //wxc 2016-11-25:7:10:03 这里的opt是优化的意思？
+#include "partitioning/partition_handler.h" // partitioning_init //wxc 2016-11-25:7:10:21 partition的概念在这里也有体现？软件设计思想的概念别太急。 
+#include "item_cmpfunc.h"               // arg_cmp_func //wxc 2016-11-25:7:11:31 cmp是什么意思？
+#include "item_strfunc.h"               // Item_func_uuid 
+#include "handler.h" //wxc 2016-11-25:7:11:48 哪一方面的handler？
 
 #ifndef EMBEDDED_LIBRARY
-#include "srv_session.h"
+#include "srv_session.h" //wxc 2016-11-25:7:12:06 srv指的是什么？
 #endif
 
 #ifdef _WIN32
 #include "named_pipe.h" //wxc 2016-11-23:0:08:51  这样的办法也是木有办法的办法了。
 #include "named_pipe_connection.h" //wxc 2016-11-23:0:19:11 这里怎么少了一个"
-#include "shared_memory_connection.h"
+#include "shared_memory_connection.h" //wxc 2016-11-25:7:12:21 连接之间还有共享内存？
 #endif
 
 using std::min; //wxc 2016-11-23:0:23:55 这个应该是标准库了。 这个using跟include本质区别？
@@ -178,7 +178,7 @@ extern "C" int memcntl(caddr_t, size_t, int, caddr_t, int, int);
 # endif
 #endif
 
-inline void setup_fpu()//wxc 2016-11-23:0:32:49 这个ninline是啥意思？
+inline void setup_fpu()//wxc 2016-11-23:0:32:49 这个inline是啥意思？
 {
 #ifdef HAVE_FEDISABLEEXCEPT
   fedisableexcept(FE_ALL_EXCEPT);
