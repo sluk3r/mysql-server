@@ -3140,7 +3140,7 @@ int init_common_variables()
   return 0; //wxc 2016-11-26:6:20:54 终于看到结尾了。 这个函数得多长。 
 }
 
-
+//wxc 2016-11-26:10:28:43 这么多线程， 用图的方式梳理下很有必要。 
 static int init_thread_environment()
 {
   mysql_mutex_init(key_LOCK_status, &LOCK_status, MY_MUTEX_INIT_FAST);
@@ -3440,7 +3440,7 @@ static int init_ssl()
   return 0;
 }
 
-
+//wxc 2016-11-26:10:29:15 这个end什么时候调用？
 static void end_ssl()
 {
 #ifdef HAVE_OPENSSL
@@ -3462,9 +3462,9 @@ static void end_ssl()
 /**
   Generate a UUID and save it into server_uuid variable.
 
-  @return Retur 0 or 1 if an error occurred.
+  @return Retur 0 or 1 if an error occurred. //wxc 2016-11-26:10:29:38 到底是0还是1. 
  */
-static int generate_server_uuid()
+static int generate_server_uuid() //wxc 2016-11-26:10:30:16 是不是所有的方法都是static的？也不对， 如果是的话。就没必要static关键字了。 
 {
   THD *thd;
   Item_func_uuid *func_uuid;
@@ -3473,7 +3473,7 @@ static int generate_server_uuid()
   /*
     To be able to run this from boot, we allocate a temporary THD
    */
-  if (!(thd=new THD))
+  if (!(thd=new THD))//wxc 2016-11-26:10:31:08 看到这个， 想起来了，还是有new关键字的。 
   {
     sql_print_error("Failed to generate a server UUID because it is failed"
                     " to allocate the THD.");
@@ -3527,7 +3527,7 @@ static int generate_server_uuid()
 
   @return Return 0 or 1 if an error occurred.
  */
-int flush_auto_options(const char* fname)
+int flush_auto_options(const char* fname)//wxc 2016-11-26:10:31:57 这个函数没有加static
 {
   File fd;
   IO_CACHE io_cache;
