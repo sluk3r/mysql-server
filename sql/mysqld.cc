@@ -121,15 +121,15 @@
 #include "../storage/myisam/ha_myisam.h"
 #include "set_var.h"
 #include "sys_vars_shared.h"
-#include "rpl_injector.h"
+#include "rpl_injector.h" //wxc 2016-11-24:22:51:16 rpl还有injector？
 #include "rpl_handler.h"
-#include <ft_global.h>
+#include <ft_global.h> //wxc 2016-11-24:22:50:59 ft怎么理解？
 #include <errmsg.h>
-#include "sp_rcontext.h"
+#include "sp_rcontext.h" //wxc 2016-11-24:22:50:47 这里的r怎么理解？
 #include "sql_reload.h"  // reload_acl_and_cache
 #include "sp_head.h"  // init_sp_psi_keys
 #include "event_data_objects.h" //init_scheduler_psi_keys
-#include "my_timer.h"    // my_timer_init, my_timer_deinit
+#include "my_timer.h"    // my_timer_init, my_timer_deinit //wxc 2016-11-24:22:51:40 这个timer一般对应着什么业务场景？
 #include "table_cache.h"                // table_cache_manager
 #include "connection_acceptor.h"        // Connection_acceptor
 #include "connection_handler_impl.h"    // *_connection_handler
