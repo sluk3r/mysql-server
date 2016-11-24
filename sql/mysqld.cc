@@ -1443,7 +1443,7 @@ static void set_ports()//wxc 2016-11-25:21:05:19 概念不陌生， 想起了毛
   char  *env;
   if (!mysqld_port && !opt_disable_networking)
   {         // Get port if not from commandline
-    mysqld_port= MYSQL_PORT;
+    mysqld_port= MYSQL_PORT; //wxc 2016-11-25:21:50:43 如果没有的设置的话， 就采用默认值。
 
     /*
       if builder specifically requested a default port, use that
@@ -1455,9 +1455,9 @@ static void set_ports()//wxc 2016-11-25:21:05:19 概念不陌生， 想起了毛
       line options.
     */
 
-#if MYSQL_PORT_DEFAULT == 0
+#if MYSQL_PORT_DEFAULT == 0 //wxc 2016-11-25:21:51:31 默认值会是0？
     struct  servent *serv_ptr;
-    if ((serv_ptr= getservbyname("mysql", "tcp")))
+    if ((serv_ptr= getservbyname("mysql", "tcp")))//wxc 2016-11-25:21:52:07 这是配置项读出来？
       mysqld_port= ntohs((u_short) serv_ptr->s_port); /* purecov: inspected */
 #endif
     if ((env = getenv("MYSQL_TCP_PORT")))
@@ -1465,7 +1465,7 @@ static void set_ports()//wxc 2016-11-25:21:05:19 概念不陌生， 想起了毛
   }
   if (!mysqld_unix_port)
   {
-#ifdef _WIN32
+#ifdef _WIN32 //wxc 2016-11-25:21:52:52 这样的跨平台好辛苦。 
     mysqld_unix_port= (char*) MYSQL_NAMEDPIPE;
 #else
     mysqld_unix_port= (char*) MYSQL_UNIX_ADDR;
@@ -1479,12 +1479,12 @@ static void set_ports()//wxc 2016-11-25:21:05:19 概念不陌生， 想起了毛
 #if !defined(_WIN32)
 /* Change to run as another user if started with --user */
 
-static struct passwd *check_user(const char *user)
+static struct passwd *check_user(const char *user) //wxc 2016-11-25:21:53:31 返回的passwd是一个结构体？
 {
-  struct passwd *tmp_user_info;
-  uid_t user_id= geteuid();
+  struct passwd *tmp_user_info;//wxc 2016-11-25:21:53:47 应验也上面的结构体的猜想。 
+  uid_t user_id= geteuid(); //wxc 2016-11-25:21:54:07 user_id怎么解释？
 
-  // Don't bother if we aren't superuser
+  // Don't bother if we aren't superuser //wxc 2016-11-25:21:54:23 这个注释背后的故事怎样？
   if (user_id)
   {
     if (user)
@@ -1499,7 +1499,7 @@ static struct passwd *check_user(const char *user)
   }
   if (!user)
   {
-    if (!opt_bootstrap && !opt_help)
+    if (!opt_bootstrap && !opt_help) //wxc 2016-11-25:21:55:04 check项不少。 
     {
       sql_print_error("Fatal error: Please read \"Security\" section of the manual to find out how to run mysqld as root!\n");
       unireg_abort(MYSQLD_ABORT_EXIT);
@@ -1538,7 +1538,7 @@ err:
   return NULL;
 }
 
-static void set_user(const char *user, struct passwd *user_info_arg)
+static void set_user(const char *user, struct passwd *user_info_arg)//wxc 2016-11-25:21:55:53 setUser的概念怎样？ 
 {
   /* purecov: begin tested */
   DBUG_ASSERT(user_info_arg != 0);
@@ -1553,7 +1553,7 @@ static void set_user(const char *user, struct passwd *user_info_arg)
   initgroups((char*) user, user_info_arg->pw_gid);
   calling_initgroups= 0;
 #endif
-  if (setgid(user_info_arg->pw_gid) == -1)
+  if (setgid(user_info_arg->pw_gid) == -1) //wxc 2016-11-25:21:56:19 gid是个什么概念?
   {
     sql_print_error("setgid: %s", strerror(errno));
     unireg_abort(MYSQLD_ABORT_EXIT);
@@ -1567,9 +1567,9 @@ static void set_user(const char *user, struct passwd *user_info_arg)
 }
 
 
-static void set_effective_user(struct passwd *user_info_arg)
+static void set_effective_user(struct passwd *user_info_arg) //wxc 2016-11-25:21:56:40 有效用户的概念怎样？ 
 {
-  DBUG_ASSERT(user_info_arg != 0);
+  DBUG_ASSERT(user_info_arg != 0);//wxc 2016-11-25:21:56:56 像是Java中的assert， 不过前面加了debug怎么理解？
   if (setregid((gid_t)-1, user_info_arg->pw_gid) == -1)
   {
     sql_print_error("setregid: %s", strerror(errno));
@@ -1596,7 +1596,7 @@ static void set_root(const char *path)
 #endif // !_WIN32
 
 
-static bool network_init(void)
+static bool network_init(void) //wxc 2016-11-25:22:33:38 终于看到init方面的函数定义了。 
 {
   if (opt_bootstrap)
     return false;
@@ -1704,7 +1704,7 @@ static inline void decrement_handler_count()
 
 extern "C" void *socket_conn_event_handler(void *arg)
 {
-  my_thread_init();
+  my_thread_init();//wxc 2016-11-25:22:35:07 这里应该是接受连接的线程。 
 
   Connection_acceptor<Mysqld_socket_listener> *conn_acceptor=
     static_cast<Connection_acceptor<Mysqld_socket_listener>*>(arg);
@@ -2018,15 +2018,15 @@ void my_init_signals()
   DBUG_VOID_RETURN;
 }
 
-
+//wxc 2016-11-26:5:39:28 相当于事件监听， 也可以看下都有哪些事件？
 static void start_signal_handler()
 {
   int error;
   my_thread_attr_t thr_attr;
   DBUG_ENTER("start_signal_handler");
 
-  (void) my_thread_attr_init(&thr_attr);
-  (void) pthread_attr_setscope(&thr_attr, PTHREAD_SCOPE_SYSTEM);
+  (void) my_thread_attr_init(&thr_attr);//wxc 2016-11-26:5:42:38 又看到方法调用前的void，是为性能考虑么？
+  (void) pthread_attr_setscope(&thr_attr, PTHREAD_SCOPE_SYSTEM);//wxc 2016-11-26:5:50:39 
   (void) my_thread_attr_setdetachstate(&thr_attr, MY_THREAD_CREATE_JOINABLE);
 
   size_t guardize= 0;
@@ -2046,7 +2046,7 @@ static void start_signal_handler()
   */
   main_thread_id= my_thread_self();
 
-  mysql_mutex_lock(&LOCK_start_signal_handler);
+  mysql_mutex_lock(&LOCK_start_signal_handler);//wxc 2016-11-26:5:52:20 如果有异常后， 这个锁会不会再继续持有？
   if ((error=
        mysql_thread_create(key_thread_signal_hand,
                            &signal_thread_id, &thr_attr, signal_hand, 0)))
@@ -2070,7 +2070,7 @@ extern "C" void *signal_hand(void *arg MY_ATTRIBUTE((unused)))
 {
   my_thread_init();
 
-  sigset_t set;
+  sigset_t set;//wxc 2016-11-26:5:53:18 sig何解？ 应该是signal
   (void) sigemptyset(&set);
   (void) sigaddset(&set, SIGTERM);
   (void) sigaddset(&set, SIGQUIT);
@@ -2082,7 +2082,7 @@ extern "C" void *signal_hand(void *arg MY_ATTRIBUTE((unused)))
     after which we signal it that we are ready.
   */
   mysql_mutex_lock(&LOCK_start_signal_handler);
-  mysql_cond_broadcast(&COND_start_signal_handler);
+  mysql_cond_broadcast(&COND_start_signal_handler); //wxc 2016-11-26:5:54:32 方法不算优雅，但还思想还是挺源远流长的。
   mysql_mutex_unlock(&LOCK_start_signal_handler);
 
   /*
@@ -2091,7 +2091,7 @@ extern "C" void *signal_hand(void *arg MY_ATTRIBUTE((unused)))
     since signal processing can be done safely only when all server components
     have been initialized.
   */
-  mysql_mutex_lock(&LOCK_server_started);
+  mysql_mutex_lock(&LOCK_server_started);//wxc 2016-11-26:5:56:40 这个等的操作也要再加锁么？
   while (!mysqld_server_started)
     mysql_cond_wait(&COND_server_started, &LOCK_server_started);
   mysql_mutex_unlock(&LOCK_server_started);
@@ -2099,16 +2099,16 @@ extern "C" void *signal_hand(void *arg MY_ATTRIBUTE((unused)))
   for (;;)
   {
     int sig;
-    while (sigwait(&set, &sig) == EINTR)
+    while (sigwait(&set, &sig) == EINTR)//wxc 2016-11-26:5:57:05 这个EINTER何解？
     {}
-    if (cleanup_done)
+    if (cleanup_done)//wxc 2016-11-26:5:57:29 启动的时候也会有clean_up？ 不一定是启动的时候。
     {
       my_thread_end();
       my_thread_exit(0);      // Safety
       return NULL;            // Avoid compiler warnings
     }
     switch (sig) {
-    case SIGTERM:
+    case SIGTERM: //wxc 2016-11-26:5:58:20 是terminate的意思？
     case SIGQUIT:
       // Switch to the file log message processing.
       query_logger.set_handlers((log_output_options != LOG_NONE) ?
@@ -2146,8 +2146,8 @@ extern "C" void *signal_hand(void *arg MY_ATTRIBUTE((unused)))
       my_thread_exit(0);
       return NULL;  // Avoid compiler warnings
       break;
-    case SIGHUP:
-      if (!abort_loop)
+    case SIGHUP://wxc 2016-11-26:6:00:47 hup何解？业务含义是？
+      if (!abort_loop)//wxc 2016-11-26:6:01:06 会有另一个线程里loop？loop的具体位置？
       {
         int not_used;
         mysql_print_status();   // Print some debug info
@@ -2177,7 +2177,7 @@ extern "C" void *signal_hand(void *arg MY_ATTRIBUTE((unused)))
 static void start_processing_signals()
 {
   mysql_mutex_lock(&LOCK_server_started);
-  mysqld_server_started= true;
+  mysqld_server_started= true; //wxc 2016-11-26:6:02:05 各种锁， 如果处理不好， 不死锁才怪。 
   mysql_cond_broadcast(&COND_server_started);
   mysql_mutex_unlock(&LOCK_server_started);
 }
@@ -2195,13 +2195,13 @@ extern "C" char *my_demangle(const char *mangled_name, int *status)
   All global error messages are sent here where the first one is stored
   for the client.
 */
-/* ARGSUSED */
+/* ARGSUSED */ //wxc 2016-11-26:6:07:02 ARGSUSED是个什么词？应该不是标准词。 
 extern "C" void my_message_sql(uint error, const char *str, myf MyFlags);
 
 void my_message_sql(uint error, const char *str, myf MyFlags)
 {
-  THD *thd= current_thd;
-  DBUG_ENTER("my_message_sql");
+  THD *thd= current_thd; //wxc 2016-11-26:6:07:49 用惯了Java这样的强命名空间的机制后， 这里看到current_thd，搞不清这个current具体指？
+  DBUG_ENTER("my_message_sql");//wxc 2016-11-26:6:09:07 类似于Java中的Logger机制， 先设置下名字。 
   DBUG_PRINT("error", ("error: %u  message: '%s'", error, str));
 
   DBUG_ASSERT(str != NULL);
@@ -2222,7 +2222,7 @@ void my_message_sql(uint error, const char *str, myf MyFlags)
     error= ER_UNKNOWN_ERROR;
   }
 
-#ifndef EMBEDDED_LIBRARY
+#ifndef EMBEDDED_LIBRARY //wxc 2016-11-26:6:11:03 具体什么Lib？
   if (error != ER_STACK_OVERRUN_NEED_MORE)
     mysql_audit_general(thd, MYSQL_AUDIT_GENERAL_ERROR, error, str);
 #endif
@@ -2246,8 +2246,8 @@ void my_message_sql(uint error, const char *str, myf MyFlags)
 }
 
 
-#ifndef EMBEDDED_LIBRARY
-extern "C" void *my_str_malloc_mysqld(size_t size);
+#ifndef EMBEDDED_LIBRARY //wxc 2016-11-26:6:11:39 类似于Tomcat使用native？
+extern "C" void *my_str_malloc_mysqld(size_t size); //wxc 2016-11-26:6:12:21 这里相当于把这个函数声明成public？跟字母C有什么关系？C语言中默认的Access机制怎样？
 extern "C" void my_str_free_mysqld(void *ptr);
 extern "C" void *my_str_realloc_mysqld(void *ptr, size_t size);
 
@@ -2335,7 +2335,7 @@ static bool init_global_datetime_format(timestamp_type format_type,
   return false;
 }
 
-SHOW_VAR com_status_vars[]= {
+SHOW_VAR com_status_vars[]= {//wxc 2016-11-26:6:15:24 大段的常量声明怎么理解？为了个甚？
   {"admin_commands",       (char*) offsetof(STATUS_VAR, com_other),                                          SHOW_LONG_STATUS, SHOW_SCOPE_ALL},
   {"assign_to_keycache",   (char*) offsetof(STATUS_VAR, com_stat[(uint) SQLCOM_ASSIGN_TO_KEYCACHE]),         SHOW_LONG_STATUS, SHOW_SCOPE_ALL},
   {"alter_db",             (char*) offsetof(STATUS_VAR, com_stat[(uint) SQLCOM_ALTER_DB]),                   SHOW_LONG_STATUS, SHOW_SCOPE_ALL},
@@ -2537,7 +2537,7 @@ PSI_statement_info com_statement_info[(uint) COM_END + 1];
   this is populated from data mined in com_status_vars,
   which already has one name for each command.
 */
-void init_sql_statement_info()
+void init_sql_statement_info()//wxc 2016-11-26:6:17:31 初始化statement， 这个机制一点也没有感觉，相像不到必要性。 
 {
   uint i;
 
@@ -2552,7 +2552,7 @@ void init_sql_statement_info()
   sql_statement_info[(uint) SQLCOM_END].m_flags= 0;
 }
 
-void init_com_statement_info()
+void init_com_statement_info()//wxc 2016-11-26:6:18:19 sql的跟com的区别？是说先占了内存？
 {
   uint index;
 
@@ -3137,7 +3137,7 @@ int init_common_variables()
     return 1;
   }
 
-  return 0;
+  return 0; //wxc 2016-11-26:6:20:54 终于看到结尾了。 这个函数得多长。 
 }
 
 
@@ -3300,7 +3300,7 @@ int warn_one(const char *file_name)
   return 0;
 
 }
-
+//wxc 2016-11-26:6:23:54  
 int warn_self_signed_ca()
 {
   int ret_val= 0;
